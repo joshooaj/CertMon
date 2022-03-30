@@ -1,0 +1,19 @@
+name: Test Certificates
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */2 * * *' # Every other hour
+jobs:
+  Test-Certificates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Pester tests
+        run: |
+          . .\test.ps1
+        shell: pwsh
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: "testResults.xml"
