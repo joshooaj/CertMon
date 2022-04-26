@@ -1,28 +1,23 @@
-param(
-    [Parameter(Mandatory)]
-    [pscustomobject[]]
-    $Urls
-)
-
-$testUris = @()
-foreach ($url in $Urls) {
-    $testUris += @{ Uri = [uri]$url.Url }
+BeforeDiscovery {
+    $script:Urls = Import-Csv $PSScriptRoot\urls.csv | Foreach-Object {
+        @{ Url = [uri]$_.Url }
+    }
 }
 
-Describe -Name "<uri>" -ForEach $testUris {
+Describe -Name "<url>" -ForEach $Urls {
     BeforeAll {
-        if ($null -eq $Uri) {
-            throw "Data driven test received no data. The value of `$Uri is `$null"
+        if ($null -eq $Url) {
+            throw "Data driven test received no data. The value of `$Url is `$null"
         }
         try {
             $script:certInfo = $null
-            $tcpClient        = [net.sockets.tcpclient]::new($Uri.Host, $Uri.Port)
+            $tcpClient        = [net.sockets.tcpclient]::new($Url.Host, $Url.Port)
             $stream           = $tcpClient.GetStream()
             $sslStream = [net.security.sslstream]::new($stream, $false, { $true })
-            $sslStream.AuthenticateAsClient($Uri.Host)
+            $sslStream.AuthenticateAsClient($Url.Host)
             $script:certInfo  = [security.cryptography.x509certificates.x509certificate2]::new($sslStream.RemoteCertificate)
         } catch {
-            Write-Host "Could not connect to $Uri" -ForegroundColor Red
+            Write-Host "Could not connect to $Url" -ForegroundColor Red
         }
     }
 
