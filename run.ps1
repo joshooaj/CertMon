@@ -1,3 +1,4 @@
+Write-Host (Get-Module -ListAvailable Pester | Out-String)
 Import-Module Pester -MinimumVersion 5.2
 $container = New-PesterContainer -Path $PSScriptRoot\Certificate.tests.ps1
 $cfg = [PesterConfiguration]@{
